@@ -1,9 +1,7 @@
 import Client from "../client";
-// eslint-disable-next-line no-shadow
 import fetch from "../fetch";
-// eslint-disable-next-line no-shadow
 import { AbortController } from "../abort";
-import { AbortError, RetryError, TimeoutError } from "../errors"; //eslint-disable-line no-shadow
+import { AbortError, RetryError, TimeoutError } from "../errors";
 
 jest.mock("../fetch");
 
@@ -88,7 +86,7 @@ describe("Client", () => {
 
 	const publishedAt = 1234567890;
 
-	function responseMock(statusCode, statusText, response) {
+	function responseMock(statusCode: number, statusText: string, response: any) {
 		return {
 			ok: statusCode >= 200 && statusCode <= 299,
 			status: statusCode,
@@ -98,8 +96,8 @@ describe("Client", () => {
 		};
 	}
 
-	function mockFetch(delay, response) {
-		return (url, opts) => {
+	function mockFetch(delay: number, response: any) {
+		return (_: string, opts: { signal: { onabort: () => void } }) => {
 			if (delay > 0) {
 				return new Promise((resolve, reject) => {
 					const timeout = setTimeout(() => {
@@ -120,14 +118,14 @@ describe("Client", () => {
 	}
 
 	it("constructor() should validate options", (done) => {
-		const deleteOption = (options, key) => {
+		const deleteOption = (options: any, key: string) => {
 			const result = Object.assign({}, options);
 			delete result[key];
 
 			return result;
 		};
 
-		const emptyOption = (options, key) => {
+		const emptyOption = (options: any, key: string) => {
 			const result = Object.assign({}, options);
 			result[key] = "";
 
@@ -160,7 +158,7 @@ describe("Client", () => {
 			.createContext({
 				units,
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenCalledWith(`${endpoint}/context`, {
 					method: "POST",
@@ -189,7 +187,7 @@ describe("Client", () => {
 
 		const client = new Client(clientOptions);
 
-		client.getContext().then((response) => {
+		client.getContext().then((response: typeof defaultMockResponse) => {
 			expect(fetch).toHaveBeenCalledTimes(1);
 			expect(fetch).toHaveBeenCalledWith(`${endpoint}/context?application=test_app&environment=test`, {
 				method: "GET",
@@ -218,7 +216,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.then((response) => {
+			.then((response: Promise<string>) => {
 				expect(fetch).toHaveBeenCalledTimes(3);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "PUT",
@@ -267,7 +265,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(fetch).toHaveBeenCalledTimes(6);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "PUT",
@@ -285,8 +283,9 @@ describe("Client", () => {
 
 				expect(error).toBeInstanceOf(RetryError);
 				expect(setTimeout).toHaveBeenCalledTimes(6);
-				// @ts-ignore
-				expect(setTimeout.mock.calls.map((x) => x[1]).reduce((x, y) => x + y)).toBeLessThanOrEqual(5000 + 1675);
+				expect(
+					(setTimeout as jest.MockedFunction<typeof setTimeout>).mock.calls.map((x) => x[1]).reduce((x, y) => x + y)
+				).toBeLessThanOrEqual(5000 + 1675);
 
 				done();
 			});
@@ -312,7 +311,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "PUT",
@@ -330,8 +329,9 @@ describe("Client", () => {
 
 				expect(error.message).toEqual("error 1");
 				expect(setTimeout).toHaveBeenCalledTimes(1);
-				// @ts-ignore
-				expect(setTimeout.mock.calls.map((x) => x[1]).reduce((x, y) => x + y)).toBe(5000);
+				expect(
+					(setTimeout as jest.MockedFunction<typeof setTimeout>).mock.calls.map((x) => x[1]).reduce((x, y) => x + y)
+				).toBe(5000);
 
 				done();
 			});
@@ -364,7 +364,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(fetch).toHaveBeenCalledTimes(6);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "PUT",
@@ -382,8 +382,9 @@ describe("Client", () => {
 
 				expect(error).toBeInstanceOf(RetryError);
 				expect(setTimeout).toHaveBeenCalledTimes(6);
-				// @ts-ignore
-				expect(setTimeout.mock.calls.map((x) => x[1]).reduce((x, y) => x + y)).toBeCloseTo(5000 + 1675, 3);
+				expect(
+					(setTimeout as jest.MockedFunction<typeof setTimeout>).mock.calls.map((x) => x[1]).reduce((x, y) => x + y)
+				).toBeCloseTo(5000 + 1675, 3);
 
 				done();
 			});
@@ -405,12 +406,12 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(response).toStrictEqual(defaultMockResponse);
 
 				done();
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				done(error);
 			});
 
@@ -434,7 +435,7 @@ describe("Client", () => {
 			.then(() => {
 				done("unexpected");
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(error).toBeInstanceOf(TimeoutError);
 
 				done();
@@ -462,7 +463,7 @@ describe("Client", () => {
 			.then(() => {
 				done("unexpected");
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(error).toBeInstanceOf(AbortError);
 
 				done();
@@ -505,7 +506,7 @@ describe("Client", () => {
 			.then(() => {
 				done("unexpected");
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(error).toBeInstanceOf(AbortError);
 
 				done();
@@ -531,7 +532,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "POST",
@@ -568,7 +569,7 @@ describe("Client", () => {
 				query: { a: 1 },
 				body: {},
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(2);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1`, {
 					method: "POST",
@@ -605,7 +606,7 @@ describe("Client", () => {
 				query: { a: 1, b: "ã=á" },
 				body: {},
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context?a=1&b=%C3%A3%3D%C3%A1`, {
 					method: "PUT",
@@ -640,7 +641,7 @@ describe("Client", () => {
 				query: {},
 				body: {},
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -673,7 +674,7 @@ describe("Client", () => {
 				method: "PUT",
 				path: "/context",
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -706,7 +707,7 @@ describe("Client", () => {
 				method: "PUT",
 				path: "/context",
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -739,7 +740,7 @@ describe("Client", () => {
 				method: "PUT",
 				path: "/context",
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenLastCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -766,7 +767,7 @@ describe("Client", () => {
 				exposures,
 				attributes,
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -806,7 +807,7 @@ describe("Client", () => {
 				goals: [],
 				exposures: [],
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenCalledWith(`${endpoint}/context`, {
 					method: "PUT",
@@ -843,7 +844,7 @@ describe("Client", () => {
 				goals: [],
 				exposures: [],
 			})
-			.then((response) => {
+			.then((response: typeof defaultMockResponse) => {
 				expect(fetch).toHaveBeenCalledTimes(1);
 				expect(fetch).toHaveBeenCalledWith(`${endpoint}/context`, {
 					method: "PUT",

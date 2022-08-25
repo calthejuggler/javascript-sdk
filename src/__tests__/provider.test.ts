@@ -9,16 +9,14 @@ describe("ContextDataProvider", () => {
 	const client = new Client();
 	const sdk = new SDK();
 
-	// @ts-ignore
-	sdk.getClient.mockReturnValue(client);
+	(sdk.getClient as jest.MockedFn<typeof sdk.getClient>).mockReturnValue(client);
 
 	describe("getContextData()", () => {
 		it("should call client getContext", async (done) => {
 			const provider = new ContextDataProvider();
 
 			const data = {};
-			// @ts-ignore
-			client.getContext.mockReturnValue(Promise.resolve(data));
+			(client.getContext as jest.MockedFn<typeof client.getContext>).mockReturnValue(Promise.resolve(data));
 
 			const result = provider.getContextData(sdk);
 
@@ -36,8 +34,7 @@ describe("ContextDataProvider", () => {
 			const provider = new ContextDataProvider();
 
 			const data = {};
-			// @ts-ignore
-			client.getContext.mockReturnValue(Promise.resolve(data));
+			(client.getContext as jest.MockedFn<typeof client.getContext>).mockReturnValue(Promise.resolve(data));
 
 			const result = provider.getContextData(sdk, { timeout: 1234 });
 

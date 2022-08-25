@@ -12,16 +12,14 @@ describe("ContextPublisher", () => {
 	const sdk = new SDK();
 	const context = new Context();
 
-	// @ts-ignore
-	sdk.getClient.mockReturnValue(client);
+	(sdk.getClient as jest.MockedFn<typeof sdk.getClient>).mockReturnValue(client);
 
 	describe("publish()", () => {
 		it("should call client publish", async (done) => {
 			const publisher = new ContextPublisher();
 
 			const data = { ok: true };
-			// @ts-ignore
-			client.publish.mockReturnValue(Promise.resolve(data));
+			(client.publish as jest.MockedFn<typeof client.publish>).mockReturnValue(Promise.resolve(data));
 
 			const request = { test: 1 };
 			const result = publisher.publish(request, sdk, context);
@@ -41,8 +39,7 @@ describe("ContextPublisher", () => {
 			const publisher = new ContextPublisher();
 
 			const data = { ok: true };
-			// @ts-ignore
-			client.publish.mockReturnValue(Promise.resolve(data));
+			(client.publish as jest.MockedFn<typeof client.publish>).mockReturnValue(Promise.resolve(data));
 
 			const request = { test: 1 };
 			const result = publisher.publish(request, sdk, context, { timeout: 1234 });

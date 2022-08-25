@@ -3,7 +3,6 @@ import SDK from "../sdk";
 import Context from "../context";
 import { ContextPublisher } from "../publisher";
 import { ContextDataProvider } from "../provider";
-import fetch from "../fetch";
 
 jest.mock("../client");
 jest.mock("../context");
@@ -120,8 +119,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const data = sdk.getContextData();
 
@@ -141,8 +141,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const contextOptions = {
 				publishDelay: 1000,
@@ -166,8 +167,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const contextOptions = {
 				publishDelay: 1000,
@@ -195,8 +197,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const contextOptions = {
 				publishDelay: 1000,
@@ -228,8 +231,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const contextOptions = {
 				publishDelay: 1000,
@@ -257,8 +261,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const contextOptions = {
 				publishDelay: 1000,
@@ -286,8 +291,9 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			const context = sdk.createContext(contextParams);
 
@@ -312,12 +318,13 @@ describe("SDK", () => {
 			const sdk = new SDK(sdkOptions);
 
 			const promise = Promise.resolve({});
-			// @ts-ignore
-			testContextDataProvider.getContextData.mockReturnValue(promise);
+			(
+				testContextDataProvider.getContextData as jest.MockedFn<typeof testContextDataProvider.getContextData>
+			).mockReturnValue(promise);
 
 			// fake browser environment
 			const previousWindow = global.window;
-			// @ts-ignore
+			//@ts-ignore
 			global.window = { document: {} };
 
 			const context = sdk.createContext(contextParams);

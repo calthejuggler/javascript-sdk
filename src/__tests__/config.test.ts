@@ -21,10 +21,10 @@ describe("Config", () => {
 				"banner.size": 812,
 				"home.arrow.direction": "up",
 			};
-			// @ts-ignore
-			context.variableKeys.mockReturnValue(variableKeys);
-			// @ts-ignore
-			context.variableValue.mockImplementation((key) => expectedValues[key]);
+			(context.variableKeys as jest.MockedFunction<typeof context.variableKeys>).mockReturnValue(variableKeys);
+			(context.variableValue as jest.MockedFunction<typeof context.variableValue>).mockImplementation(
+				(key) => expectedValues[key]
+			);
 
 			const previousConfig = {
 				button: false,
@@ -54,37 +54,37 @@ describe("Config", () => {
 				other: "unused",
 			};
 
-			const actual = mergeConfig(context, previousConfig);
+			const actual: any = mergeConfig(context, previousConfig);
 			expect(actual).not.toBe(previousConfig); // should be a clone and new properties are not values, but have accessors
 			expect(actual).toMatchObject(expectedConfig);
 			expect(context.variableValue).toHaveBeenCalledTimes(4); // called during equality check above
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.button).toEqual(expectedConfig.button);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("button", previousConfig.button);
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.banner.border).toEqual(expectedConfig.banner.border);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("banner.border", previousConfig.banner.border);
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.banner.size).toEqual(expectedConfig.banner.size);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("banner.size", previousConfig.banner.size);
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.home.arrow.direction).toEqual(expectedConfig.home.arrow.direction);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("home.arrow.direction", previousConfig.home.arrow.direction);
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.other).toEqual(expectedConfig.other);
 			expect(context.variableValue).toHaveBeenCalledTimes(0);
 
@@ -109,10 +109,10 @@ describe("Config", () => {
 				"banner.size": 812,
 				"home.arrow.direction": "up",
 			};
-			// @ts-ignore
-			context.variableKeys.mockReturnValue(variableKeys);
-			// @ts-ignore
-			context.variableValue.mockImplementation((key) => expectedValues[key]);
+			(context.variableKeys as jest.MockedFn<typeof context.variableKeys>).mockReturnValue(variableKeys);
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockImplementation(
+				(key) => expectedValues[key]
+			);
 
 			const previousConfig = {
 				button: true,
@@ -142,12 +142,12 @@ describe("Config", () => {
 				other: "unused",
 			};
 
-			const actual = mergeConfig(context, previousConfig);
+			const actual: any = mergeConfig(context, previousConfig);
 			expect(actual).not.toBe(previousConfig); // should be a clone and new properties are not values, but have accessors
 			expect(actual).toMatchObject(expectedConfig);
 			expect(context.variableValue).toHaveBeenCalledTimes(4); // called during equality check above
-			// @ts-ignore
-			context.variableValue.mockClear();
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
 
 			expect(console.warn).toHaveBeenCalledTimes(2);
 			expect(console.warn).toHaveBeenCalledWith(
@@ -156,18 +156,18 @@ describe("Config", () => {
 			expect(console.warn).toHaveBeenCalledWith(
 				"Config key 'home.arrow.direction' for experiment 'exp_test_arrow' is overriding non-object value at 'home.arrow' with an object."
 			);
-			// @ts-ignore
+
 			expect(actual.button.active).toEqual(expectedConfig.button.active);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("button.active", undefined);
-			// @ts-ignore
-			context.variableValue.mockClear();
-			// @ts-ignore
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
+
 			expect(actual.home.arrow.direction).toEqual(expectedConfig.home.arrow.direction);
 			expect(context.variableValue).toHaveBeenCalledTimes(1);
 			expect(context.variableValue).toHaveBeenCalledWith("home.arrow.direction", undefined);
-			// @ts-ignore
-			context.variableValue.mockClear();
+
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
 
 			done();
 		});
@@ -194,10 +194,10 @@ describe("Config", () => {
 				"home.arrow": "up",
 				"home.arrow.direction": "up",
 			};
-			// @ts-ignore
-			context.variableKeys.mockReturnValue(variableKeys);
-			// @ts-ignore
-			context.variableValue.mockImplementation((key) => expectedValues[key]);
+			(context.variableKeys as jest.MockedFn<typeof context.variableKeys>).mockReturnValue(variableKeys);
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockImplementation(
+				(key) => expectedValues[key]
+			);
 
 			const previousConfig = {
 				button: {
@@ -231,8 +231,7 @@ describe("Config", () => {
 			expect(actual).not.toBe(previousConfig); // should be a clone and new properties are not values, but have accessors
 			expect(actual).toMatchObject(expectedConfig);
 			expect(context.variableValue).toHaveBeenCalledTimes(4); // called during equality check above
-			// @ts-ignore
-			context.variableValue.mockClear();
+			(context.variableValue as jest.MockedFn<typeof context.variableValue>).mockClear();
 
 			expect(console.error).toHaveBeenCalledTimes(1);
 			expect(console.error).toHaveBeenCalledWith("Config key 'home.arrow' already set by experiment 'exp_test_arrow'.");

@@ -220,14 +220,10 @@ describe("Context", () => {
 	const publisher = new ContextPublisher();
 	const provider = new ContextDataProvider();
 
-	// @ts-ignore
-	sdk.getContextDataProvider.mockReturnValue(provider);
-	// @ts-ignore
-	sdk.getContextPublisher.mockReturnValue(publisher);
-	// @ts-ignore
-	sdk.getClient.mockReturnValue(client);
-	// @ts-ignore
-	sdk.getEventLogger.mockReturnValue(SDK.defaultEventLogger);
+	(sdk.getContextDataProvider as jest.MockedFn<typeof sdk.getContextDataProvider>).mockReturnValue(provider);
+	(sdk.getContextPublisher as jest.MockedFn<typeof sdk.getContextPublisher>).mockReturnValue(publisher);
+	(sdk.getClient as jest.MockedFn<typeof sdk.getClient>).mockReturnValue(client);
+	(sdk.getEventLogger as jest.MockedFn<typeof sdk.getEventLogger>).mockReturnValue(SDK.defaultEventLogger);
 
 	const contextOptions = {
 		publishDelay: -1,
@@ -315,8 +311,7 @@ describe("Context", () => {
 		});
 
 		it("should call event logger on error", (done) => {
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 
 			const context = new Context(sdk, contextOptions, contextParams, Promise.reject("bad request error text"));
 			context.ready().then(() => {
@@ -328,8 +323,7 @@ describe("Context", () => {
 		});
 
 		it("should call event logger on success", (done) => {
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 
 			const context = new Context(sdk, contextOptions, contextParams, Promise.resolve(getContextResponse));
 			context.ready().then(() => {
@@ -341,8 +335,7 @@ describe("Context", () => {
 		});
 
 		it("should call event logger on pre-fetched experiment data", (done) => {
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 			context.ready().then(() => {
@@ -402,16 +395,15 @@ describe("Context", () => {
 			context.ready().then(() => {
 				expect(setInterval).toHaveBeenCalledTimes(1);
 				expect(setInterval).toHaveBeenCalledWith(expect.anything(), refreshPeriod);
-				// @ts-ignore
-				setInterval.mockClear();
+				(setInterval as jest.MockedFunction<typeof setInterval>).mockClear();
 
 				jest.advanceTimersByTime(refreshPeriod - 1);
 
 				expect(provider.getContextData).not.toHaveBeenCalled();
 
 				const getContextPromise = Promise.resolve(refreshContextResponse);
-				// @ts-ignore
-				provider.getContextData.mockReturnValue(getContextPromise);
+
+				(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(getContextPromise);
 
 				jest.advanceTimersByTime(refreshPeriod);
 
@@ -419,13 +411,15 @@ describe("Context", () => {
 					expect(setInterval).not.toHaveBeenCalled();
 					expect(provider.getContextData).toHaveBeenCalledTimes(1);
 					expect(provider.getContextData).toHaveBeenCalledWith(sdk, undefined);
-					// @ts-ignore
-					provider.getContextData.mockClear();
+
+					(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockClear();
 
 					// test another interval
 					const nextGetContextPromise = Promise.resolve(refreshContextResponse);
-					// @ts-ignore
-					provider.getContextData.mockReturnValue(nextGetContextPromise);
+
+					(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+						nextGetContextPromise
+					);
 
 					jest.advanceTimersByTime(refreshPeriod);
 					nextGetContextPromise.then(() => {
@@ -461,8 +455,7 @@ describe("Context", () => {
 
 				context.treatment("exp_test_ab");
 
-				// @ts-ignore
-				publisher.publish.mockReturnValue(Promise.resolve());
+				(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 				jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -536,8 +529,9 @@ describe("Context", () => {
 		it("should call client and load new data", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(provider.getContextData).toHaveBeenCalledTimes(1);
@@ -556,8 +550,9 @@ describe("Context", () => {
 		it("should pass through request options", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.refresh({ timeout: 1234 }).then(() => {
 				expect(provider.getContextData).toHaveBeenCalledTimes(1);
@@ -575,8 +570,9 @@ describe("Context", () => {
 
 		it("should reject promise on error", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			provider.getContextData.mockReturnValueOnce(Promise.reject(new Error("test error")));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValueOnce(
+				Promise.reject(new Error("test error"))
+			);
 
 			context.refresh().catch((error) => {
 				expect(error.message).toEqual("test error");
@@ -593,8 +589,9 @@ describe("Context", () => {
 
 			expect(context.pending()).toEqual(getContextResponse.experiments.length);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(context.pending()).toEqual(getContextResponse.experiments.length);
@@ -633,11 +630,11 @@ describe("Context", () => {
 		it("should call event logger when failed", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, Promise.resolve(getContextResponse));
 			context.ready().then(() => {
-				// @ts-ignore
-				provider.getContextData.mockReturnValueOnce(Promise.reject(new Error("test error")));
+				(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValueOnce(
+					Promise.reject(new Error("test error"))
+				);
 
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.refresh().catch((error) => {
 					expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 					expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "error", error);
@@ -649,12 +646,12 @@ describe("Context", () => {
 
 		it("should call event logger on success", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, Promise.resolve(getContextResponse));
-			// @ts-ignore
-			provider.getContextData.mockReturnValueOnce(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValueOnce(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.ready().then(() => {
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.refresh().then(() => {
 					expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 					expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "refresh", refreshContextResponse);
@@ -666,8 +663,7 @@ describe("Context", () => {
 
 		it("should throw after finalized() call", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.treatment("exp_test_ab");
 
@@ -686,8 +682,9 @@ describe("Context", () => {
 		it("should keep overrides", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.override("not_found", 3);
 			expect(context.peek("not_found")).toEqual(3);
@@ -702,8 +699,9 @@ describe("Context", () => {
 		it("should keep custom assignments", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(refreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(refreshContextResponse)
+			);
 
 			context.customAssignment("exp_test_ab", 3);
 
@@ -725,11 +723,12 @@ describe("Context", () => {
 
 			const stoppedRefreshContextResponse = clone(getContextResponse);
 			stoppedRefreshContextResponse.experiments = stoppedRefreshContextResponse.experiments.filter(
-				(x) => x.name !== experimentName
+				(x: { name: string }) => x.name !== experimentName
 			);
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(stoppedRefreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(stoppedRefreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(context.treatment(experimentName)).toEqual(0);
@@ -755,8 +754,9 @@ describe("Context", () => {
 				}
 			}
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(fullOnRefreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(fullOnRefreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(context.treatment(experimentName)).toEqual(1);
@@ -780,8 +780,9 @@ describe("Context", () => {
 				}
 			}
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(scaledUpRefreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(scaledUpRefreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(context.treatment(experimentName)).toEqual(2);
@@ -809,8 +810,9 @@ describe("Context", () => {
 				}
 			}
 
-			// @ts-ignore
-			provider.getContextData.mockReturnValue(Promise.resolve(iteratedRefreshContextResponse));
+			(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+				Promise.resolve(iteratedRefreshContextResponse)
+			);
 
 			context.refresh().then(() => {
 				expect(context.treatment(experimentName)).toEqual(1);
@@ -839,8 +841,9 @@ describe("Context", () => {
 			}
 		}
 
-		// @ts-ignore
-		provider.getContextData.mockReturnValue(Promise.resolve(iteratedRefreshContextResponse));
+		(provider.getContextData as jest.MockedFn<typeof provider.getContextData>).mockReturnValue(
+			Promise.resolve(iteratedRefreshContextResponse)
+		);
 
 		context.refresh().then(() => {
 			expect(context.treatment(experimentName)).toEqual(1);
@@ -904,8 +907,7 @@ describe("Context", () => {
 			}
 
 			expect(context.pending()).toEqual(getContextResponse.experiments.length);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -1017,8 +1019,7 @@ describe("Context", () => {
 
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 			for (const experiment of getContextResponse.experiments) {
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.treatment(experiment.name);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "exposure", {
@@ -1037,8 +1038,7 @@ describe("Context", () => {
 
 			// check it calls logger only once
 			for (const experiment of getContextResponse.experiments) {
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.treatment(experiment.name);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(0);
 			}
@@ -1056,8 +1056,7 @@ describe("Context", () => {
 			expect(context.treatment("not_found")).toEqual(0);
 
 			expect(context.pending()).toEqual(1);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -1119,8 +1118,7 @@ describe("Context", () => {
 			expect(context.treatment("not_found")).toEqual(3);
 
 			expect(context.pending()).toEqual(2);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -1166,8 +1164,7 @@ describe("Context", () => {
 
 		it("should throw after finalized() call", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.treatment("exp_test_ab");
 
@@ -1206,8 +1203,7 @@ describe("Context", () => {
 			}
 
 			expect(context.pending()).toEqual(getContextResponse.experiments.length);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -1354,8 +1350,7 @@ describe("Context", () => {
 			const exposed = {};
 
 			for (const [key, experimentName] of Object.entries(variableExperiments)) {
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.variableValue(key, 17);
 
 				if (experiments.indexOf(experimentName) !== -1) {
@@ -1383,8 +1378,7 @@ describe("Context", () => {
 
 			// check it calls logger only once
 			for (const [key, experimentName] of Object.entries(variableExperiments)) {
-				// @ts-ignore
-				SDK.defaultEventLogger.mockClear();
+				(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 				context.variableValue(key, 17);
 				if (experiments.indexOf(experimentName) !== -1) {
 					expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(0);
@@ -1405,8 +1399,7 @@ describe("Context", () => {
 
 		it("should throw after finalized() call", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.variableValue("button.color", 17);
 
@@ -1495,8 +1488,7 @@ describe("Context", () => {
 			context.track("goal2", { tests: 12 });
 
 			expect(context.pending()).toEqual(3);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -1537,8 +1529,7 @@ describe("Context", () => {
 
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 			context.track("goal1", { amount: 125, hours: 245 });
 			expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 			expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "goal", {
@@ -1611,8 +1602,7 @@ describe("Context", () => {
 
 		it("should throw after finalized() call", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.treatment("exp_test_ab");
 
@@ -1673,8 +1663,7 @@ describe("Context", () => {
 				jest.advanceTimersByTime(publishDelay - 1);
 
 				expect(publisher.publish).not.toHaveBeenCalled();
-				// @ts-ignore
-				publisher.publish.mockReturnValue(Promise.resolve({}));
+				(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve({}));
 
 				jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -1708,8 +1697,7 @@ describe("Context", () => {
 		it("should not call client publish when queue is empty", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 			expect(context.pending()).toEqual(0);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).not.toHaveBeenCalled();
@@ -1722,8 +1710,7 @@ describe("Context", () => {
 			expect(context.pending()).toEqual(0);
 
 			context.track("goal1", { amount: 125 });
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.reject("test"));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.reject("test"));
 
 			context.publish().catch((e) => {
 				expect(e).toEqual("test");
@@ -1740,14 +1727,11 @@ describe("Context", () => {
 
 			context.treatment("exp_test_ab");
 			context.treatment("exp_test_not_eligible");
-			// @ts-ignore
-			Date.now.mockImplementation(() => timeOrigin + 1); // ensure that time is kept separately per event
+			(Date.now as jest.MockedFn<typeof Date.now>).mockImplementation(() => timeOrigin + 1); // ensure that time is kept separately per event
 			context.track("goal1", { amount: 125, hours: 245 });
-			// @ts-ignore
-			Date.now.mockImplementation(() => timeOrigin + 2);
+			(Date.now as jest.MockedFn<typeof Date.now>).mockImplementation(() => timeOrigin + 2);
 			context.attribute("attr1", "value1");
-			// @ts-ignore
-			Date.now.mockImplementation(() => timeOrigin + 3);
+			(Date.now as jest.MockedFn<typeof Date.now>).mockImplementation(() => timeOrigin + 3);
 			context.attributes({
 				attr2: "value2",
 				attr3: 3,
@@ -1762,8 +1746,7 @@ describe("Context", () => {
 			});
 
 			expect(context.pending()).toEqual(3);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -1884,8 +1867,7 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.track("goal1", { amount: 125, hours: 245 });
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -1921,11 +1903,9 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.track("goal1", { amount: 125, hours: 245 });
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.reject("test error"));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.reject("test error"));
 
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 			context.publish().catch((error) => {
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "error", error);
@@ -1941,13 +1921,11 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.track("goal1", { amount: 125, hours: 245 });
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 			context.publish().then(() => {
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "publish", {
@@ -1974,8 +1952,7 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, Promise.reject("bad request error text"));
 			context.ready().then(() => {
 				context.treatment("exp_test_ab");
-				// @ts-ignore
-				Date.now.mockImplementation(() => timeOrigin + 1); // ensure that time is kept separately per event
+				(Date.now as jest.MockedFn<typeof Date.now>).mockImplementation(() => timeOrigin + 1); // ensure that time is kept separately per event
 				context.track("goal1", { amount: 125, hours: 245 });
 
 				expect(context.pending()).toEqual(2);
@@ -2006,8 +1983,7 @@ describe("Context", () => {
 			expect(context.treatment("exp_test_abc")).toEqual(3);
 
 			expect(context.pending()).toEqual(4);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve({}));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve({}));
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -2079,8 +2055,7 @@ describe("Context", () => {
 					);
 
 					expect(context.pending()).toEqual(0);
-					// @ts-ignore
-					publisher.publish.mockClear();
+					(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockClear();
 				})
 				.then(() => {
 					context.track("goal2", { test: 999 });
@@ -2154,8 +2129,7 @@ describe("Context", () => {
 			jest.advanceTimersByTime(publishDelay - 1);
 
 			expect(publisher.publish).not.toHaveBeenCalled();
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve({}));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve({}));
 
 			jest.advanceTimersByTime(2);
 
@@ -2191,8 +2165,7 @@ describe("Context", () => {
 			jest.advanceTimersByTime(publishDelay - 1);
 
 			expect(publisher.publish).not.toHaveBeenCalled();
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve({}));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve({}));
 
 			jest.advanceTimersByTime(2);
 
@@ -2201,8 +2174,7 @@ describe("Context", () => {
 
 		it("should throw after finalized() call", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 			context.treatment("exp_test_ab");
 
 			expect(context.pending()).toEqual(1);
@@ -2222,8 +2194,7 @@ describe("Context", () => {
 		it("should not call client publish when queue is empty", (done) => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 			expect(context.pending()).toEqual(0);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.finalize().then(() => {
 				expect(publisher.publish).not.toHaveBeenCalled();
@@ -2241,8 +2212,7 @@ describe("Context", () => {
 			expect(context.pending()).toEqual(0);
 
 			context.treatment("exp_test_ab");
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.reject("test"));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.reject("test"));
 
 			context.finalize().catch((e) => {
 				expect(e).toEqual("test");
@@ -2265,8 +2235,7 @@ describe("Context", () => {
 			context.treatment("exp_test_ab");
 
 			expect(context.pending()).toEqual(1);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -2317,8 +2286,7 @@ describe("Context", () => {
 			context.treatment("exp_test_ab");
 
 			expect(context.pending()).toEqual(1);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -2364,11 +2332,9 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.treatment("exp_test_ab");
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.reject("test error"));
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.reject("test error"));
 
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 			context.finalize().catch((error) => {
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(1);
 				expect(SDK.defaultEventLogger).toHaveBeenCalledWith(context, "error", error);
@@ -2386,11 +2352,9 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.treatment("exp_test_ab");
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
-			// @ts-ignore
-			SDK.defaultEventLogger.mockClear();
+			(SDK.defaultEventLogger as jest.MockedFn<typeof SDK.defaultEventLogger>).mockClear();
 			context.finalize().then(() => {
 				expect(SDK.defaultEventLogger).toHaveBeenCalledTimes(2);
 				expect(SDK.defaultEventLogger).toHaveBeenLastCalledWith(context, "finalize", undefined);
@@ -2429,8 +2393,7 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.treatment("exp_test_ab");
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			const firstPromise = context.finalize();
 			const secondPromise = context.finalize();
@@ -2452,8 +2415,7 @@ describe("Context", () => {
 			const context = new Context(sdk, contextOptions, contextParams, getContextResponse);
 
 			context.treatment("exp_test_ab");
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.finalize().then(() => {
 				expect(context.isFinalizing()).toEqual(false);
@@ -2481,8 +2443,7 @@ describe("Context", () => {
 
 			expect(setInterval).toHaveBeenCalledTimes(1);
 			expect(setInterval).toHaveBeenCalledWith(expect.anything(), refreshPeriod);
-			// @ts-ignore
-			const timerId = setInterval.mock.results[0].value;
+			const timerId = (setInterval as jest.MockedFunction<typeof setInterval>).mock.results[0].value;
 
 			context.finalize().then(() => {
 				expect(context.isFinalizing()).toEqual(false);
@@ -2519,8 +2480,7 @@ describe("Context", () => {
 
 				context.treatment("exp_test_ab");
 				context.treatment("exp_test_abc");
-				// @ts-ignore
-				publisher.publish.mockReturnValue(Promise.resolve());
+				(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 				jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
@@ -2584,8 +2544,7 @@ describe("Context", () => {
 			context.treatment("exp_test_abc");
 
 			expect(context.pending()).toEqual(1);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -2633,8 +2592,7 @@ describe("Context", () => {
 			context.treatment("exp_test_fullon");
 
 			expect(context.pending()).toEqual(2);
-			// @ts-ignore
-			publisher.publish.mockReturnValue(Promise.resolve());
+			(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 			context.publish().then(() => {
 				expect(publisher.publish).toHaveBeenCalledWith(
@@ -2700,8 +2658,7 @@ describe("Context", () => {
 
 				context.treatment("exp_test_ab");
 				context.treatment("exp_test_abc");
-				// @ts-ignore
-				publisher.publish.mockReturnValue(Promise.resolve());
+				(publisher.publish as jest.MockedFn<typeof publisher.publish>).mockReturnValue(Promise.resolve());
 
 				jest.spyOn(Date, "now").mockImplementation(() => timeOrigin + 100);
 
