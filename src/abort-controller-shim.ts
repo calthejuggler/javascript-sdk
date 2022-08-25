@@ -4,15 +4,14 @@ interface IEvent {
 	bubbles: boolean;
 }
 
-// eslint-disable-next-line no-shadow
 export class AbortSignal {
 	aborted = false;
-	_events: { [key: string]: any[] };
+	_events?: { [key: string]: any[] };
+	onabort: () => void;
 
 	constructor() {
 		this._events = {};
 	}
-
 	addEventListener(type: string, listener: any) {
 		let listeners = this._events[type];
 		if (!listeners) {
@@ -45,13 +44,11 @@ export class AbortSignal {
 		}
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	toString() {
 		return "[object AbortSignal]";
 	}
 }
 
-// eslint-disable-next-line no-shadow
 export class AbortController {
 	signal = new AbortSignal();
 
@@ -71,7 +68,6 @@ export class AbortController {
 		this.signal.dispatchEvent(evt);
 	}
 
-	// eslint-disable-next-line class-methods-use-this
 	toString() {
 		return "[object AbortController]";
 	}
