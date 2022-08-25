@@ -6,9 +6,7 @@
 		"module": "CommonJS",
 		"moduleResolution": "Node",
 		"isolatedModules": true,
-		"noEmit": true,
+		"noEmit": true
 	},
-	"include": [
-		"./src/**/*"
-	]
+	"include": ["./src/**/*"]
 }
