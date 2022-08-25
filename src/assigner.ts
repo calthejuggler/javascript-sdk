@@ -16,10 +16,8 @@ export class VariantAssigner {
 		const key = this._unitHash;
 		const buffer = new ArrayBuffer(12);
 		const view = new DataView(buffer);
-		// @ts-ignore
-		view.setUint32(0, seedLo, true);
-		// @ts-ignore
-		view.setUint32(4, seedHi, true);
+		view.setUint32(0, typeof seedLo === "number" ? seedLo : parseInt(seedLo.join()), true);
+		view.setUint32(4, typeof seedHi === "number" ? seedHi : parseInt(seedHi.join()), true);
 		view.setUint32(8, key, true);
 
 		return murmur3_32(buffer) * (1.0 / 0xffffffff);
