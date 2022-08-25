@@ -1,8 +1,5 @@
 // inspired by https://github.com/bradlc/unfetch-abortable
-import { AbortSignal } from "./abort-controller-shim";
 import { AbortError } from "./errors";
-
-// eslint-disable-next-line no-shadow
 
 interface IContextOptions {
 	credentials?: string;
@@ -53,7 +50,7 @@ export function fetch(url: string, options?: IContextOptions) {
 		request.open(options.method || "get", url, true);
 
 		request.onload = () => {
-			request.getAllResponseHeaders().replace(/^(.*?):[^\S\n]*([\s\S]*?)$/gm, (m, key, value) => {
+			request.getAllResponseHeaders().replace(/^(.*?):[^\S\n]*([\s\S]*?)$/gm, (_, key, value) => {
 				keys.push((key = key.toLowerCase()));
 				all.push([key, value]);
 				return (headers[key] = headers[key] ? `${headers[key]},${value}` : value);

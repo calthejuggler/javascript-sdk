@@ -1,6 +1,4 @@
-// eslint-disable-next-line no-shadow
 import { fetch } from "../fetch-shim";
-// eslint-disable-next-line no-shadow
 import { AbortController } from "../abort";
 import { Response } from "node-fetch";
 

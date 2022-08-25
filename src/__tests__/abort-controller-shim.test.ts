@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-shadow
 import { AbortController, AbortSignal } from "../abort-controller-shim";
 
 describe("AbortSignal", () => {
@@ -15,7 +14,6 @@ describe("AbortSignal", () => {
 			const listener1 = jest.fn();
 			const listener2 = jest.fn();
 			const listener3 = jest.fn();
-			// @ts-ignore
 			signal.onabort = listener3;
 			signal.addEventListener("abort", listener1);
 			signal.addEventListener("abort", listener2);
