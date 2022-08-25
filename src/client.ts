@@ -1,8 +1,8 @@
-import fetch from "./fetch"; // eslint-disable-line no-shadow
-// eslint-disable-next-line no-shadow
+import fetch from "./fetch";
 import { AbortController } from "./abort";
 import { AbortError, RetryError, TimeoutError } from "./errors";
 import { AbortSignal } from "./abort-controller-shim";
+import { IRequestOptions } from "./types";
 
 interface IApplication {
 	name: string;
@@ -138,7 +138,7 @@ export default class Client {
 		});
 	}
 
-	request(options) {
+	request(options: IRequestOptions) {
 		let url = `${this._opts.endpoint}${options.path}`;
 		if (options.query) {
 			const keys = Object.keys(options.query);
@@ -168,19 +168,27 @@ export default class Client {
 				};
 			}
 
-			return fetch(url, opts).then((response) => {
-				if (!response.ok) {
-					const bail = response.status >= 400 && response.status < 500;
-					return response.text().then((text) => {
-						let error: ErrorType = new Error(text !== null && text.length > 0 ? text : response.statusText);
-						error._bail = bail;
+			return fetch(url, opts).then(
+				(response: {
+					ok: boolean;
+					status: number;
+					statusText: string;
+					text: () => Promise<string>;
+					json: () => Promise<string>;
+				}) => {
+					if (!response.ok) {
+						const bail = response.status >= 400 && response.status < 500;
+						return response.text().then((text) => {
+							let error: ErrorType = new Error(text !== null && text.length > 0 ? text : response.statusText);
+							error._bail = bail;
 
-						return Promise.reject(error);
-					});
+							return Promise.reject(error);
+						});
+					}
+
+					return response.json();
 				}
-
-				return response.json();
-			});
+			);
 		};
 
 		const wait: any = (ms: number) =>
@@ -199,7 +207,7 @@ export default class Client {
 		const tryWith: any = (retries: number, timeout: number, tries: number = 0, waited: number = 0) => {
 			delete tryWith.timedout;
 
-			return tryOnce().catch((reason) => {
+			return tryOnce().catch((reason: { _bail: any; message: string; name: string }) => {
 				console.warn(reason);
 
 				if (reason._bail || retries <= 0) {
@@ -250,7 +258,7 @@ export default class Client {
 		});
 	}
 
-	post(options) {
+	post(options: any) {
 		return this.request({
 			...options,
 			auth: true,
@@ -258,7 +266,7 @@ export default class Client {
 		});
 	}
 
-	put(options) {
+	put(options: any) {
 		return this.request({
 			...options,
 			auth: true,
@@ -266,7 +274,7 @@ export default class Client {
 		});
 	}
 
-	getUnauthed(options) {
+	getUnauthed(options: any) {
 		return this.request({
 			...options,
 			method: "GET",

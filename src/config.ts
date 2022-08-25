@@ -2,8 +2,8 @@ import clone from "rfdc/default";
 import { Context } from ".";
 import { isObject } from "./utils";
 
-export function mergeConfig(context: Context, previousConfig: {}): {} {
-	const merged: Object = clone(previousConfig);
+export function mergeConfig(context: Context, previousConfig: {}) {
+	const merged: any = clone(previousConfig);
 	const keys = context.variableKeys();
 
 	for (const [variableKey, experimentName] of Object.entries(keys)) {

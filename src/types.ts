@@ -1,3 +1,5 @@
+import { AbortSignal } from "./abort-controller-shim";
+
 export type expectedAttrs = string[] | number[] | boolean[] | string | number | boolean | unknown;
 
 export interface Attrs {
@@ -39,4 +41,15 @@ export interface IRequest {
 	exposures?: IExposures[];
 	attributes?: Attrs[];
 	test?: number;
+}
+
+// Interface for request() in Client class
+export interface IRequestOptions {
+	signal?: AbortSignal | AbortSignal;
+	body?: {};
+	timeout?: number;
+	query?: {};
+	path: string;
+	method: string;
+	auth: boolean;
 }

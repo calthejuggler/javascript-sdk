@@ -84,7 +84,7 @@ export default class Context {
 	_indexVariables: IIndexVariables[] | IIndexVariables;
 	_finalizing: Promise<unknown>;
 	_data: any;
-	constructor(sdk: SDK, options?: IOptions, params?: Params | IParams, promise?: any) {
+	constructor(sdk?: SDK, options?: IOptions, params?: Params | IParams, promise?: any) {
 		this._sdk = sdk;
 		this._publisher = options.publisher || this._sdk.getContextPublisher();
 		this._dataProvider = options.dataProvider || this._sdk.getContextDataProvider();
@@ -150,7 +150,7 @@ export default class Context {
 		}
 
 		return new Promise((resolve) => {
-			this._promise.then(() => resolve(true)).catch((e) => resolve(e));
+			this._promise.then(() => resolve(true)).catch((e: Error) => resolve(e));
 		});
 	}
 
@@ -193,7 +193,7 @@ export default class Context {
 		this._checkReady(true);
 
 		return new Promise<void>((resolve, reject) => {
-			this._refresh((error) => {
+			this._refresh((error: Error) => {
 				if (error) {
 					reject(error);
 				} else {

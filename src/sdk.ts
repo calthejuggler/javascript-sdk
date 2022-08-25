@@ -46,7 +46,7 @@ export default class SDK {
 	_eventLogger: unknown;
 	_publisher: ContextPublisher;
 	_provider: ContextDataProvider;
-	static defaultEventLogger = (context, eventName: string, data: any) => {
+	static defaultEventLogger = (_: string, eventName: string, data: any) => {
 		if (eventName === "error") {
 			console.error(data);
 		}
@@ -85,7 +85,7 @@ export default class SDK {
 		return new Context(this, options, params, data);
 	}
 
-	setEventLogger(logger) {
+	setEventLogger(logger: () => void) {
 		this._eventLogger = logger;
 	}
 
